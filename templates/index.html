@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gestion des étudiants — Mini-projet CRUD</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main class="container">
+    <header>
+      <div><p class="eyebrow">Mini-projet • Conteneurisation & orchestration</p><h1>Gestion des étudiants</h1>
+      <p>Ajouter, consulter, modifier et supprimer des étudiants.</p></div>
+      <span class="pill">Flask + SQLAlchemy</span>
+    </header>
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+      <div class="alert {{ category }}">{{ message }}</div>
+    {% endfor %}
+    <section class="card">
+      <h2>Ajouter un étudiant</h2>
+      <form action="{{ url_for('ajouter') }}" method="post" class="student-form">
+        <label>Nom<input name="nom" placeholder="Alami" required maxlength="100"></label>
+        <label>Prénom<input name="prenom" placeholder="Ahmed" required maxlength="100"></label>
+        <label>E-mail<input type="email" name="email" placeholder="ahmed@example.com" required maxlength="200"></label>
+        <label>Filière<input name="filiere" placeholder="Génie logiciel" required maxlength="100"></label>
+        <button type="submit">+ Ajouter</button>
+      </form>
+    </section>
+    <section class="card">
+      <div class="section-heading"><h2>Liste des étudiants</h2><span class="count">{{ etudiants|length }} étudiant(s)</span></div>
+      <div class="table-wrapper">
+        <table>
+          <thead><tr><th>ID</th><th>Nom complet</th><th>E-mail</th><th>Filière</th><th>Actions</th></tr></thead>
+          <tbody>
+          {% for etudiant in etudiants %}
+            <tr><td>{{ etudiant.id }}</td><td>{{ etudiant.prenom }} {{ etudiant.nom }}</td><td>{{ etudiant.email }}</td><td>{{ etudiant.filiere }}</td>
+              <td class="actions"><button class="small secondary" type="button" onclick="document.getElementById('edit-{{ etudiant.id }}').showModal()">Modifier</button>
+              <form action="{{ url_for('supprimer', etudiant_id=etudiant.id) }}" method="post" onsubmit="return confirm('Supprimer cet étudiant ?')"><button class="small danger" type="submit">Supprimer</button></form></td>
+            </tr>
+          {% else %}
+            <tr><td colspan="5" class="empty">Aucun étudiant. Ajoute ton premier étudiant ci-dessus.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+    {% for etudiant in etudiants %}
+      <dialog id="edit-{{ etudiant.id }}">
+        <form method="post" action="{{ url_for('modifier', etudiant_id=etudiant.id) }}" class="edit-form">
+          <h2>Modifier l'étudiant #{{ etudiant.id }}</h2>
+          <label>Nom<input name="nom" value="{{ etudiant.nom }}" required maxlength="100"></label>
+          <label>Prénom<input name="prenom" value="{{ etudiant.prenom }}" required maxlength="100"></label>
+          <label>E-mail<input type="email" name="email" value="{{ etudiant.email }}" required maxlength="200"></label>
+          <label>Filière<input name="filiere" value="{{ etudiant.filiere }}" required maxlength="100"></label>
+          <div class="dialog-actions"><button type="button" class="secondary" onclick="document.getElementById('edit-{{ etudiant.id }}').close()">Annuler</button><button type="submit">Enregistrer</button></div>
+        </form>
+      </dialog>
+    {% endfor %}
+  </main>
+</body>
+</html>

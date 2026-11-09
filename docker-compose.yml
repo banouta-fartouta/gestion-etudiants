@@ -1,0 +1,29 @@
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: etudiantsdb
+      POSTGRES_USER: etudiant
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Generate .env first}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U etudiant -d etudiantsdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    ports:
+      - "127.0.0.1:8081:5000"
+    environment:
+      DATABASE_URL: postgresql+psycopg://etudiant:${POSTGRES_PASSWORD:?Generate .env first}@db:5432/etudiantsdb
+      SECRET_KEY: ${SECRET_KEY:?Generate .env first}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
